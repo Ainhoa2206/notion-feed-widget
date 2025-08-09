@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notion Feed</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 20px;
+      background: #fafafa;
+    }
+    .post {
+      width: 200px;
+      text-align: center;
+    }
+    .post img {
+      width: 100%;
+      border-radius: 8px;
+    }
+    .post .dia {
+      margin-top: 5px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    async function loadPosts() {
+      const res = await fetch("/api/publicaciones");
+      const posts = await res.json();
+
+      posts.forEach(post => {
+        if (post.image) {
+          const div = document.createElement("div");
+          div.className = "post";
+          div.innerHTML = `
+            <img src="${post.image}" alt="Post image" />
+            <div class="dia">${post.dia}</div>
+          `;
+          document.body.appendChild(div);
+        }
+      });
+    }
+
+    loadPosts();
+  </script>
+</body>
+</html>

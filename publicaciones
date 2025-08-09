@@ -1,0 +1,41 @@
+// api/publicaciones.js
+import { Client } from "@notionhq/client";
+
+export default async function handler(req, res) {
+  const notion = new Client({ auth: process.env.NOTION_API_KEY });
+
+  try {
+    const databaseId = process.env.NOTION_DATABASE_ID;
+    const response = await notion.databases.query({
+      database_id: databaseId,
+      sorts: [
+        {
+          property: "DÍA", // Ordenar por la columna "DÍA"
+          direction: "ascending",
+        },
+      ],
+    });
+
+    const posts = response.results.map((page) => {
+      const linkProp = page.properties["9. Link diseño"];
+      let imageUrl = null;
+
+      if (linkProp && linkProp.url) {
+        imageUrl = linkProp.url;
+      } else if (linkProp && linkProp.rich_text?.length > 0) {
+        imageUrl = linkProp.rich_text[0].text.content;
+      }
+
+      return {
+        id: page.id,
+        dia: page.properties["DÍA"]?.title?.[0]?.plain_text || "",
+        image: imageUrl,
+      };
+    });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error fetching data from Notion" });
+  }
+}
